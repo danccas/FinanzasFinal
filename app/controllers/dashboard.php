@@ -13,6 +13,11 @@ $form->setTitle('Formulario');
 $ls = $db->get("SELECT * FROM empresa");
 $ls = result_parse_to_options($ls, 'id', 'razon_social');
 $form->addField('empresa_id:Empresa', 'select')->setOptions($ls);
+
+$ls = $db->get("SELECT * FROM moneda");
+$ls = result_parse_to_options($ls, 'id', 'nombre');
+$form->addField('moneda_id:Moneda', 'select')->setOptions($ls);
+
 $form->addField('fecha_emision', 'input:date');
 $form->addField('valor_nominal', 'input:number')->setMin(100)->setMax(100000)->setStep(1);
 $form->addField('valor_comercial', 'input:number')->setMin(100)->setMax(100000)->setStep(1);
@@ -46,9 +51,9 @@ $form->addField('porcentaje_cavali', 'input:number')->setMin(0)->setMax(100)->se
 Route::any('', function() use($db) {
   $table = Tablefy::getInstance('bonos');
   $table->setTitle('Relación de bonos');
-  $table->setHeader('COD','EMPRESA','V.NOMINAL','V.COMERCIAL','AÑOS','TASA','FRECUENC.','CAPITALIZ.','T.INTERES','TASA DESCUENTO','IMPUESTO RENTA');
+  $table->setHeader('COD','MONED','EMPRESA','V.NOM','V.COMERC','AÑOS','TASA','FRECUENC.','CAPITALIZ.','T.INTERES','TASA DESCUENTO','IMPUESTO RENTA');
   $table->setData(function($e) use($db) {
-    return $db->pagination("
+    return $db->get("
       SELECT
         E.razon_social,
         B.*,
@@ -56,16 +61,19 @@ Route::any('', function() use($db) {
         C.nombre as capitalizacion,
         C.cantidad_dias as capitalizacion_dias,
         FP.nombre as frecuencia_pago,
-        FP.cantidad_dias as frecuencia_pago_dias
+        FP.cantidad_dias as frecuencia_pago_dias,
+        M.nombre as moneda
       FROM bono B
+      JOIN moneda M ON M.id = B.moneda_id
       JOIN empresa E ON E.id = B.empresa_id
       JOIN tipo_tasa TT ON TT.id = B.tipo_tasa_id
       JOIN capitalizacion C ON C.id = B.capitalizacion_id
       JOIN frecuencia_pago FP ON FP.id = B.frecuencia_pago_id
-      ORDER BY B.id DESC");
+      ORDER BY B.id ASC");
   }, function($n) {
     return array(
       $n['id'],
+      $n['moneda'],
       $n['razon_social'],
       $n['valor_nominal'],
       $n['valor_comercial'],
@@ -73,9 +81,9 @@ Route::any('', function() use($db) {
       $n['tipo_tasa'],
       $n['frecuencia_pago'],
       $n['capitalizacion'],
-      $n['tasa_interes'],
-      $n['tasa_descuento'] . '%',
-      $n['impuesto_renta'] .'%',
+      number_format($n['tasa_interes'], 2) . '%',
+      number_format($n['tasa_descuento'], 2) . '%',
+      number_format($n['impuesto_renta'], 2) .'%',
     );
   });
   $table->setOption('Ingresar', function($n) use($db) {

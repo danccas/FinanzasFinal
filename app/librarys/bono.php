@@ -20,7 +20,16 @@ function obtener_pagos_de_bono($n) {
   if($n['tipo_tasa_id'] == 1) {
     $n['tep'] = pow(1+($n['tasa_interes'] / 100),$n['frecuencia_pago_dias'] / $n['dias_por_anho']) - 1;
   } else {
-    $n['tep'] = pow(1+(($n['tasa_interes'] / 100)/$n['dias_por_anho']),$n['frecuencia_pago_dias']) - 1;
+
+
+    $_M = $n['dias_por_anho'] / $n['capitalizacion_dias'];
+    $_M = 360 / 30;
+    $_N = $n['frecuencia_pago_dias'] / $n['capitalizacion_dias'];
+    $_N = 180 / 30;
+    $n['tep'] = pow(1 + ($n['tasa_interes'] / 100 / $_M), $_N) - 1;
+
+#    $n['tep'] = pow(1 +(($n['tasa_interes'] / 100)/$n['dias_por_anho']),$n['frecuencia_pago_dias']) - 1;
+
   }
 
   $escudo = 0;

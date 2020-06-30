@@ -23,6 +23,10 @@
       <div class="card-content">
         <table class="table is-fullwidth">
         <tr>
+          <th>Moneda</th>
+          <td><?= $bono['moneda'] ?></td>
+        </tr>
+        <tr>
           <th>Nomimal</th>
           <td><?= $bono['valor_nominal'] ?></td>
         </tr>
@@ -113,6 +117,10 @@
 
         <div style="max-width: 400px;margin: 0 auto;margin-top: 30px;">
         <table class="table is-fullwidth">
+        <tr>
+          <th>Moneda</th>
+          <td><?= $bono['moneda'] ?></td>
+        </tr>
         <tr>
           <th>COK del Periodo</th>
           <td><?= number_format($bono['cok'] * 100, 4) ?>%</td>
